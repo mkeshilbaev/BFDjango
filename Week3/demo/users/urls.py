@@ -1,7 +1,9 @@
-from django.urls import path, include
+from django.urls import path
 
-from demo.core import views
+from .views import login, logout, register
 
 urlpatterns = [
-    path('home', views.index)
+    path('login/', login),
+    path('logout/', logout),
+    path('register/', register),
 ]
