@@ -4,7 +4,7 @@ from onlineshop.models import Product, Category
 
 
 class Command(BaseCommand):
-    help = 'Monitor existing products in DB'
+    help = 'see existing products price'
 
     def handle(self, *args, **kwargs):
         data = [

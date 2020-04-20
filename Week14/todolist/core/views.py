@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 
 from core.models import Project, Task
-from core.serializers import ProjectSerializer, TaskSerializer
+from core.serializers import ProjectSerializer, TaskFullSerializer, TaskShortSerializer, TaskChangeSerializer
 
 logger = logging.getLogger('log')
 
@@ -30,9 +30,9 @@ class ProjectListAPIView(mixins.ListModelMixin,
 
 class ProjectViewSet(mixins.ListModelMixin,
                      mixins.CreateModelMixin,
-                     mixins.RetrieveModelMixin,
-                     mixins.UpdateModelMixin,
-                     mixins.DestroyModelMixin,
+                     # mixins.RetrieveModelMixin,
+                     # mixins.UpdateModelMixin,
+                     # mixins.DestroyModelMixin,
                      viewsets.GenericViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
@@ -43,7 +43,7 @@ class ProjectViewSet(mixins.ListModelMixin,
     #     return Project.objects.for_user(user=self.request.user)
 
     @action(methods=['GET'], detail=False)
-    def projects(self, request):
+    def myprojects(self, request):
         projects = Project.objects.filter(creator=self.request.user)
         serializer = self.get_serializer(projects, many=True)
         return Response(serializer.data)
@@ -51,7 +51,7 @@ class ProjectViewSet(mixins.ListModelMixin,
     @action(methods=['GET'], detail=True)
     def tasks(self, request, pk):
         instance = self.get_object()
-        serializer = TaskSerializer(instance.tasks, many=True)
+        serializer = TaskShortSerializer(instance.tasks, many=True)
         return Response(serializer.data)
 
     def perform_create(self, serializer):
@@ -62,19 +62,33 @@ class ProjectViewSet(mixins.ListModelMixin,
         logger.critical(f"{self.request.user} created task: {serializer.data.get('name')}")
 
 
-class TaskViewSet(mixins.ListModelMixin,
-                  mixins.CreateModelMixin,
+class TaskViewSet(mixins.CreateModelMixin,
                   mixins.RetrieveModelMixin,
                   mixins.UpdateModelMixin,
-                  mixins.DestroyModelMixin,
                   viewsets.GenericViewSet):
-    serializer_class = TaskSerializer
+    # serializer_class = TaskSerializer
     queryset = Task.objects.all()
     # permission_classes = (IsAuthenticated,)
     parser_classes = (FormParser, MultiPartParser, JSONParser)
 
-    def get_queryset(self):
-        return Task.objects.for_user(user=self.request.user)
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return TaskFullSerializer
+        if self.action == 'set_executor':
+            return TaskShortSerializer
+        if self.action in ['create', 'update']:
+            return TaskChangeSerializer
+
+    # def get_queryset(self):
+    #     return Task.objects.for_user(user=self.request.user)
+
+    # @action(methods=['PUT'], detail=True)
+    # def set_executor(self, request, pk):
+    #     instance = self.get_object()
+    #     instance.set_executor(request.data.get('executor_id'))
+    #     serializer = self.get_serializer(instance)
+    #     logger.info(f"{self.request.user} set as executor id: {request.data.get('executor_id')}")
+    #     return Response(serializer.data)
 
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)

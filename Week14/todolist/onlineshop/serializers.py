@@ -3,21 +3,6 @@ from rest_framework import serializers
 from onlineshop.models import Category, Product
 
 
-# class CategorySerializer(serializers.Serializer):
-#     id = serializers.IntegerField(read_only=True)
-#     name = serializers.CharField(required=True)
-#     desc = serializers.CharField(required=True)
-#
-#     def create(self, validated_data):
-#         category = Category(**validated_data)
-#         category.save()
-#         return category
-#
-#     def update(self, instance, validated_data):
-#         instance.name = validated_data.get('name', instance.name)
-#         instance.save()
-#         return instance
-
 class CategorySerializer(serializers.ModelSerializer):
     attachment = serializers.FileField()
     class Meta:

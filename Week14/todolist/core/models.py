@@ -3,14 +3,6 @@ from django.db import models
 from auth_.models import MyUser
 from utils.validators import validate_file_size
 
-TASK_DONE = 1
-TASK_TODO = 2
-
-TASK_STATUS = (
-    ('is_done', 'DONE'),
-    ('is_todo', 'TODO'),
-)
-
 
 class Project(models.Model):
     name = models.CharField(max_length=300)
@@ -36,6 +28,13 @@ class Project(models.Model):
     def tasks_count(self):
         return self.tasks.count()
 
+TASK_DONE = 1
+TASK_TODO = 2
+
+TASK_STATUS = (
+    ('is_done', 'DONE'),
+    ('is_todo', 'TODO'),
+)
 
 class TaskDoneManager(models.Manager):
     def get_queryset(self):
@@ -60,6 +59,15 @@ class TaskTodoManager(models.Manager):
 
 
 class Task(models.Model):
+    TASK_DONE = 1
+    TASK_TODO = 2
+
+    TASK_STATUS = (
+        ('is_done', 'DONE'),
+        ('is_todo', 'TODO'),
+    )
+
+
     TASK_PRIORITY_LOW = 1
     TASK_PRIORITY_MEDIUM = 2
     TASK_PRIORITY_HIGH = 3
@@ -74,10 +82,9 @@ class Task(models.Model):
     is_deleted = models.BooleanField(default=False)
     description = models.TextField(default='')
     priority = models.PositiveIntegerField(choices=TASK_PRIORITIES, default=TASK_PRIORITY_MEDIUM)
-
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, related_name='tasks', null=True)
     creator = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='created_tasks')
-
+    executor = models.ForeignKey(MyUser, on_delete=models.SET_NULL, related_name='my_tasks', null=True)
 
     objects = models.Manager()
     done_tasks = TaskDoneManager()

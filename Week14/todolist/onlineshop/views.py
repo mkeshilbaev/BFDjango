@@ -10,11 +10,14 @@ logger = logging.getLogger('log')
 
 
 class CategoryList(generics.ListCreateAPIView):
-    serializer_class = CategorySerializer
+    # serializer_class = CategorySerializer
     # permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         return Category.objects.for_user(self.request.user)
+
+    def get_serializer_class(self):
+        return CategorySerializer
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

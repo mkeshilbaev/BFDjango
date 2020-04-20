@@ -5,7 +5,7 @@ from core.models import Project, Task
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        self.stdout.write(self.style.WARNING(f'Deleting all objects in database'))
+        self.stdout.write(self.style.WARNING(f'Deleting all ectries in DB'))
 
         Project.objects.all().delete()
         Task.objects.all().delete()
